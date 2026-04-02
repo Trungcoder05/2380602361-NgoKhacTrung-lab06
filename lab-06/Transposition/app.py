@@ -3,14 +3,21 @@ import math
 
 app = Flask(__name__)
 
+# --- THUẬT TOÁN MÃ HÓA ---
 def encrypt_logic(key, text):
     key_len = len(key)
     rows = math.ceil(len(text) / key_len)
-    text += "X" * (rows * key_len - len(text)) # Padding
+    # Thêm ký tự X cho đủ bảng
+    text += "X" * (rows * key_len - len(text))
     matrix = [text[i:i + key_len] for i in range(0, len(text), key_len)]
     key_indices = sorted(range(len(key)), key=lambda k: key[k])
-    return "".join("".join(matrix[row][col] for row in range(rows)) for col in key_indices)
+    result = ""
+    for col in key_indices:
+        for row in range(rows):
+            result += matrix[row][col]
+    return result
 
+# --- THUẬT TOÁN GIẢI MÃ ---
 def decrypt_logic(key, ciphertext):
     key_len = len(key)
     rows = math.ceil(len(ciphertext) / key_len)
@@ -23,8 +30,10 @@ def decrypt_logic(key, ciphertext):
             curr_idx += 1
     return "".join("".join(row) for row in matrix)
 
+# --- ĐƯỜNG DẪN WEB ---
 @app.route('/')
 def index():
+    # Flask sẽ tìm file này trong thư mục templates/
     return render_template('index.html')
 
 @app.route('/process', methods=['POST'])
@@ -34,11 +43,13 @@ def process():
     key = data.get('key', '')
     mode = data.get('mode', 'encrypt')
     
-    if not text or not key:
-        return jsonify({"error": "Thiếu dữ liệu"}), 400
+    if mode == 'encrypt':
+        res = encrypt_logic(key, text)
+    else:
+        res = decrypt_logic(key, text)
         
-    result = encrypt_logic(key, text) if mode == 'encrypt' else decrypt_logic(key, text)
-    return jsonify({"result": result})
+    return jsonify({"result": res})
 
+# --- QUAN TRỌNG: DÒNG NÀY ĐỂ CHẠY SERVER ---
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5000)
