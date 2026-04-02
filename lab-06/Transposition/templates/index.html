@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Transposition Cipher Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-2xl w-full bg-slate-800/50 backdrop-blur-lg rounded-2xl p-8 border border-slate-700 shadow-2xl">
+        <h2 class="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+            <i class="fas fa-random mr-2"></i> Transposition Cipher
+        </h2>
+
+        <div class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium mb-2 text-slate-300">Nội dung văn bản</label>
+                <textarea id="inputText" rows="4" class="w-full bg-slate-900/80 border border-slate-600 rounded-xl p-4 focus:ring-2 focus:ring-blue-500 focus:outline-none text-white" placeholder="Nhập văn bản..."></textarea>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2 text-slate-300">Từ khóa (Key)</label>
+                <input type="text" id="cipherKey" class="w-full bg-slate-900/80 border border-slate-600 rounded-xl p-3 focus:ring-2 focus:ring-emerald-500 text-white" placeholder="Ví dụ: SECRET">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="sendToPython('encrypt')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-95">Mã hóa</button>
+                <button onclick="sendToPython('decrypt')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-95">Giải mã</button>
+            </div>
+
+            <hr class="border-slate-700">
+
+            <div class="relative">
+                <label class="block text-sm font-medium mb-2 text-slate-300">Kết quả</label>
+                <textarea id="outputText" rows="4" readonly class="w-full bg-slate-950/50 border border-slate-700 rounded-xl p-4 text-emerald-400 font-mono" placeholder="Kết quả trả về từ Python..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function sendToPython(mode) {
+            const text = document.getElementById('inputText').value;
+            const key = document.getElementById('cipherKey').value;
+            
+            if (!text || !key) { alert("Vui lòng nhập đủ thông tin!"); return; }
+
+            // Đoạn này gửi dữ liệu lên server Python
+            const response = await fetch('/process', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ text, key, mode })
+            });
+
+            const data = await response.json();
+            document.getElementById('outputText').value = data.result || data.error;
+        }
+    </script>
+</body>
+</html>
